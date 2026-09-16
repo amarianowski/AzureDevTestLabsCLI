@@ -26,12 +26,28 @@ public class LabsManager(ArmClient client)
             };
             labs.Add(lab);
         }  
-
         return labs;
     }
 
-    // public async Task ListLabVirtualMachines(string labName)
-    // {
-        
-    // }
+    public async Task<List<VirtualMachine>> ListLabVirtualMachines()
+    {
+        var resourceQuery = $"resourceType eq 'Microsoft.DevTestLab/labs/virtualMachines'";
+        var subscription = await client.GetDefaultSubscriptionAsync();
+        var resources = subscription.GetGenericResources(resourceQuery);          
+        var virtualMachines = new List<VirtualMachine>();
+
+        foreach(var resource in resources)
+        {
+            var name = resource.Data.Name.Split("/");
+            var virtualMachine = new VirtualMachine
+            {
+                LabName = name[0],
+                Name = name[1],
+                ResourceGroupName = resource.Id.ResourceGroupName
+            };
+            virtualMachines.Add(virtualMachine);
+        }
+
+        return virtualMachines;
+    }
 }
